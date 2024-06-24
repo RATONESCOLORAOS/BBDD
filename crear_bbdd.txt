@@ -1,0 +1,95 @@
+***CREAR BASE DE DATOS***
+
+CREATE DATABASE productos_supermercado;
+USE productos_supermercado;
+
+***CREAR LAS TABLAS NECESARIAS***
+
+CREATE TABLE IF NOT EXISTS user (
+    id_user INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    avg FLOAT,
+    vehicle VARCHAR(255),
+    longitud_latitud VARCHAR(255)
+);
+
+CREATE TABLE IF NOT EXISTS user_list (
+    id_user_list INT AUTO_INCREMENT PRIMARY KEY,
+    id_user INT,
+    date DATE,
+    list_name VARCHAR(255),
+    price FLOAT,
+    km FLOAT,
+    id_comp INT,
+    FOREIGN KEY (id_user) REFERENCES user(id_user)
+);
+
+CREATE TABLE IF NOT EXISTS comparativa (
+    id_comp INT AUTO_INCREMENT PRIMARY KEY,
+    precio_alternativo FLOAT,
+    super_alternativo VARCHAR(255),
+    id_user_list INT,
+    FOREIGN KEY (id_user_list) REFERENCES user_list(id_user_list)
+);
+
+CREATE TABLE IF NOT EXISTS user_list_productos (
+    id_user INT,
+    id_producto INT,
+    id_user_list INT,
+    PRIMARY KEY (id_user, id_producto, id_user_list),
+    FOREIGN KEY (id_user) REFERENCES user(id_user),
+    FOREIGN KEY (id_producto) REFERENCES productos(id_producto),
+    FOREIGN KEY (id_user_list) REFERENCES user_list(id_user_list)
+);
+
+***PEQUEÑOS CAMBIOS NECESARIOS***
+
+ALTER TABLE productos DROP PRIMARY KEY;
+ALTER TABLE productos MODIFY COLUMN id_producto INT AUTO_INCREMENT;
+DESCRIBE productos;
+ALTER TABLE productos MODIFY COLUMN id_producto INT AUTO_INCREMENT;
+
+**CREAMOS TRIGGERS
+DELIMITER //
+
+CREATE TRIGGER set_avg_null_after_insert
+BEFORE INSERT ON user
+FOR EACH ROW
+BEGIN
+    IF NEW.vehicle = 'NO' OR NEW.vehicle = 'no' THEN
+        SET NEW.avg = NULL;
+    END IF;
+END//
+
+DELIMITER ;
+
+DELIMITER //
+
+CREATE TRIGGER set_avg_null_after_update
+BEFORE UPDATE ON user
+FOR EACH ROW
+BEGIN
+    IF NEW.vehicle = 'NO' OR NEW.vehicle = 'no' THEN
+        SET NEW.avg = NULL;
+    END IF;
+END//
+
+DELIMITER ;
+
+
+**AÑADIMOS ELIMINACIÓN EN CASCADA
+
+ALTER TABLE user_list_productos
+ADD CONSTRAINT fk_user FOREIGN KEY (id_user) REFERENCES user(id_user) ON DELETE CASCADE,
+ADD CONSTRAINT fk_producto FOREIGN KEY (id_producto) REFERENCES productos(id_producto) ON DELETE CASCADE,
+ADD CONSTRAINT fk_user_list FOREIGN KEY (id_user_list) REFERENCES user_list(id_user_list) ON DELETE CASCADE;
+
+
+ALTER TABLE comparativa
+ADD CONSTRAINT fk_comparativa_user_list FOREIGN KEY (id_user_list) 
+REFERENCES user_list(id_user_list) ON DELETE CASCADE;
+
+ALTER TABLE user_list
+ADD CONSTRAINT fk_user_list_user FOREIGN KEY (id_user) REFERENCES user(id_user) ON DELETE CASCADE;
