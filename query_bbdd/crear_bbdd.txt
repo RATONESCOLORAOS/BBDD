@@ -1,9 +1,14 @@
-***CREAR BASE DE DATOS***
-
-CREATE DATABASE productos_supermercado;
 USE productos_supermercado;
 
-***CREAR LAS TABLAS NECESARIAS***
+ALTER TABLE productos
+MODIFY COLUMN id_producto SMALLINT;
+
+ALTER TABLE productos
+ADD PRIMARY KEY (id_producto);
+
+
+DESCRIBE productos;
+SELECT * FROM productos;
 
 CREATE TABLE IF NOT EXISTS user (
     id_user INT AUTO_INCREMENT PRIMARY KEY,
@@ -36,7 +41,7 @@ CREATE TABLE IF NOT EXISTS comparativa (
 
 CREATE TABLE IF NOT EXISTS user_list_productos (
     id_user INT,
-    id_producto INT,
+    id_producto SMALLINT,
     id_user_list INT,
     PRIMARY KEY (id_user, id_producto, id_user_list),
     FOREIGN KEY (id_user) REFERENCES user(id_user),
@@ -44,12 +49,11 @@ CREATE TABLE IF NOT EXISTS user_list_productos (
     FOREIGN KEY (id_user_list) REFERENCES user_list(id_user_list)
 );
 
-***PEQUEÑOS CAMBIOS NECESARIOS***
 
-ALTER TABLE productos DROP PRIMARY KEY;
-ALTER TABLE productos MODIFY COLUMN id_producto INT AUTO_INCREMENT;
-DESCRIBE productos;
-ALTER TABLE productos MODIFY COLUMN id_producto INT AUTO_INCREMENT;
+
+
+
+
 
 **CREAMOS TRIGGERS
 DELIMITER //
@@ -79,7 +83,6 @@ END//
 DELIMITER ;
 
 
-**AÑADIMOS ELIMINACIÓN EN CASCADA
 
 ALTER TABLE user_list_productos
 ADD CONSTRAINT fk_user FOREIGN KEY (id_user) REFERENCES user(id_user) ON DELETE CASCADE,
@@ -92,4 +95,7 @@ ADD CONSTRAINT fk_comparativa_user_list FOREIGN KEY (id_user_list)
 REFERENCES user_list(id_user_list) ON DELETE CASCADE;
 
 ALTER TABLE user_list
-ADD CONSTRAINT fk_user_list_user FOREIGN KEY (id_user) REFERENCES user(id_user) ON DELETE CASCADE;
+ADD CONSTRAINT fk_user_list_user
+FOREIGN KEY (id_user)
+REFERENCES user(id_user)
+ON DELETE CASCADE;
